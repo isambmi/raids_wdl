@@ -48,20 +48,19 @@ task VcfPreprocessing {
     input {
         String sample_id
         File vcf_in
-        String vcf = basename(vcf_in)
         String docker
         Int preemptible
     }
+    String vcf_name = basename(vcf_in)
+    
     command 
     <<<
-        VCF="~{vcf_in}"
-
-        bcftools index --tbi "$VCF"
+        bcftools index --tbi ~{vcf_in}
         
-        cp $VCF .
+        cp ~{vcf_in} .
 
         bcftools view -v snps -M2 \
-        -Oz -o ~{sample_id}.vcf.gz ~{vcf} && \
+        -Oz -o ~{sample_id}.vcf.gz ~{vcf_name} && \
         bcftools index -t ~{sample_id}.vcf.gz
     >>>
     runtime {

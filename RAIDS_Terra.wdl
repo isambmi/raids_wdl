@@ -10,30 +10,32 @@ workflow RAIDS {
         File ref_fai = "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
         Int nb_profiles = 30
 
-        String docker_bcftools = "quay.io/biocontainers/bcftools"
+        String docker_bcftools = "quay.io/biocontainers/bcftools:1.22--h3a4d415_1"
         String docker_raids = "isabmi/raids:latest"
 
-        Boolean run_TN = false
+        Int preemptible = 1
     }
 
     call VcfPreprocessing {
         input:
             vcf_in=vcf_in,
-            sample_id = sample_id,
+            sample_id=sample_id,
         
-            docker = docker_bcftools
+            docker=docker_bcftools,
+            preemptible=preemptible
     }
 
     call RunRAIDS {
         input:
-            final_vcf = VcfPreprocessing.final_vcf,
-            final_vcf_idx = VcfPreprocessing.final_vcf_idx,
-            ref_genotype = ref_genotype,
-            ref_annotation = ref_annotation,
-            ref_fai = ref_fai,
-            nb_profiles = nb_profiles,
+            final_vcf=VcfPreprocessing.final_vcf,
+            final_vcf_idx=VcfPreprocessing.final_vcf_idx,
+            ref_genotype=ref_genotype,
+            ref_annotation=ref_annotation,
+            ref_fai=ref_fai,
+            nb_profiles=nb_profiles,
 
-            docker = docker_raids
+            docker=docker_raids,
+            preemptible=preemptible
     }
 
     output {
@@ -48,7 +50,7 @@ task VcfPreprocessing {
         File vcf_in
         String vcf = basename(vcf_in)
         String docker
-        
+        Int preemptible
     }
     command 
     <<<
@@ -66,7 +68,7 @@ task VcfPreprocessing {
         docker: docker
         memory: "2G"
         cpu: 1
-        preemptible: 1
+        preemptible: preemptible
     }
     output {
         File final_vcf = "~{sample_id}.vcf.gz"
@@ -84,6 +86,7 @@ task RunRAIDS {
         Int nb_profiles
 
         String docker
+        Int preemptible
         
         String sample_name = basename(final_vcf, ".vcf.gz")
     }
@@ -98,7 +101,7 @@ task RunRAIDS {
     runtime {
         docker: docker
         cpu: 1
-        preemptible: 1
+        preemptible: preemptible
         memory: "10G"
     }
     output {

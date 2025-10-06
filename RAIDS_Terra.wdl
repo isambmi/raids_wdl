@@ -141,8 +141,9 @@ task ReannotateVcf {
     }
     runtime {
         docker: docker
-        cpu: 1
         memory: "100M"
+        cpu: 1
+        preemptible: 1
     }
     output {
         File reannotated_vcf = "~{sample_id}.hg19.vcf.gz"
@@ -174,8 +175,9 @@ task LiftOverVcf {
     }
     runtime {
         docker: docker
-        cpu: 2
-        memory: "5G"
+        memory: "10G"
+        cpu: 1
+        preemptible: 1
     }
     output {
         File lifted_vcf = "~{sample_id}.hg38.vcf.gz"
@@ -208,8 +210,9 @@ task VcfPreprocessing {
     }
     runtime {
         docker: docker
-        cpu: 1
         memory: "100M"
+        cpu: 1
+        preemptible: 1
     }
     output {
         File final_vcf = "~{sample_id}.vcf.gz"
@@ -240,6 +243,7 @@ task GetTNFromHeader {
   runtime { 
         docker: docker 
         cpu: 1
+        preemptible: 1
         memory: "100M"
     }
   output {
@@ -266,6 +270,7 @@ task SubSample {
     runtime {
         docker: docker
         cpu: 1
+        preemptible: 1
         memory: "100M"
     }
     output {
@@ -297,8 +302,9 @@ task RunRAIDS {
     }
     runtime {
         docker: docker
-        cpu: 2
-        memory: "8G"
+        cpu: 1
+        preemptible: 1
+        memory: "10G"
     }
     output {
         File ancestry_csv = "~{sample_name}_ancestry.csv"

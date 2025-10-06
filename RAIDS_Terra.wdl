@@ -6,7 +6,7 @@ workflow RAIDS {
         String vcf_ref = "hg38"
         File? chr_map
         File vcf_in
-        File vcf_in_idx
+        File? vcf_in_idx
         String sample_id
         File? lift_chain
         File? target_ref_fa
@@ -17,12 +17,22 @@ workflow RAIDS {
         File ref_fai = "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
         Int nb_profiles = 30
 
-        String docker_bcftools = "biocontainers/bcftools:v1.9-1-deb_cv1"
         String docker_gatk = "broadinstitute/gatk:4.6.2.0"
+        String docker_bcftools = "broadinstitute/gatk:4.6.2.0"
         String docker_raids = "isabmi/raids:latest"
 
         Boolean run_TN = false
     }
+
+    if (!defined(vcf_in_idx)) {
+        call IndexVcf {
+            input:
+                vcf_in=vcf_in,
+                docker=docker_bcftools
+        }
+    }
+
+    File vcf_index = select_first([IndexVcf.vcf_index, vcf_in_idx])
 
     if (vcf_ref != "hg38") {
         call ReannotateVcf {
@@ -30,7 +40,7 @@ workflow RAIDS {
                 chr_map=chr_map,
                 sample_id=sample_id,
                 vcf_in=vcf_in,
-                vcf_in_idx=vcf_in_idx,
+                vcf_in_idx=vcf_index,
                 
                 docker=docker_bcftools
         }
@@ -50,7 +60,7 @@ workflow RAIDS {
     }
 
     File pre_raids_vcf = select_first([LiftOverVcf.lifted_vcf, vcf_in])
-    File pre_raids_idx = select_first([LiftOverVcf.lifted_idx, vcf_in_idx])
+    File pre_raids_idx = select_first([LiftOverVcf.lifted_idx, vcf_index])
 
     call VcfPreprocessing {
         input:
@@ -125,12 +135,42 @@ workflow RAIDS {
     }
 }
 
+task IndexVcf {
+    input {
+        File vcf_in
+        String docker
+
+    }
+    command 
+    <<<
+        VCF="~{vcf_in}"
+
+        if [[ "$VCF" =~ \.vcf\.gz$ || "$VCF" =~ \.bcf$ ]]; then
+            bcftools index --tbi "$VCF"
+            echo "${VCF}.tbi" > idxpath.txt
+        else
+            gatk IndexFeatureFile -I "$VCF"
+            echo "${VCF}.idx" > idxpath.txt
+        fi      
+    >>>
+    runtime {
+        docker: docker
+        memory: "1G"
+        cpu: 1
+        preemptible: 1
+    }
+    output {
+        File vcf_index = read_string("idxpath.txt")
+    }
+
+}
+
 task ReannotateVcf {
     input {
         File? chr_map
         String sample_id
         File vcf_in
-        File vcf_in_idx
+        File? vcf_in_idx
         String docker
 
     }

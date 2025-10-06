@@ -1,5 +1,5 @@
-  version: 1.0
-  workflows:
-  name: RAIDS_Terra
+version: 1.2
+workflows:
+  - name: RAIDS
     subclass: WDL
-    primaryDescriptorPath:/RAIDS_Terra.wdl
+    primaryDescriptorPath: /RAIDS_Terra.wdl

@@ -15,7 +15,6 @@ workflow RAIDS {
 
         Int preemptible = 1
         Int raids_cpu = 1
-        String raids_cpu = 1
         String raids_mem = "10G"
     }
 
@@ -39,7 +38,8 @@ workflow RAIDS {
 
             docker=docker_raids,
             preemptible=preemptible,
-            raids_cpu=raids_cpu
+            raids_cpu=raids_cpu,
+            raids_mem=raids_mem
     }
 
     output {

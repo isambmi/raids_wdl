@@ -16,6 +16,7 @@ workflow RAIDS {
         Int preemptible = 1
         Int raids_cpu = 1
         String raids_mem = "10G"
+        String raids_disk = "local-disk 50 HDD"
     }
 
     call VcfPreprocessing {
@@ -39,7 +40,8 @@ workflow RAIDS {
             docker=docker_raids,
             preemptible=preemptible,
             raids_cpu=raids_cpu,
-            raids_mem=raids_mem
+            raids_mem=raids_mem,
+            raids_disk=raids_disk
     }
 
     output {
@@ -89,6 +91,7 @@ task RunRAIDS {
         Int preemptible
         Int raids_cpu
         String raids_mem
+        String raids_disk
         
         String sample_name = basename(final_vcf, ".vcf.gz")
     }
@@ -106,6 +109,7 @@ task RunRAIDS {
         cpu: raids_cpu
         preemptible: preemptible
         memory: raids_mem
+        disks: raids_disk
     }
     output {
         File ancestry_csv = "~{sample_name}_ancestry.csv"

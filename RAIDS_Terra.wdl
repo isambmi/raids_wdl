@@ -14,6 +14,7 @@ workflow RAIDS {
         String docker_raids = "isambmi/raids:latest"
 
         Int preemptible = 1
+        Int raids_cpu = 1
     }
 
     call VcfPreprocessing {
@@ -35,7 +36,8 @@ workflow RAIDS {
             nb_profiles=nb_profiles,
 
             docker=docker_raids,
-            preemptible=preemptible
+            preemptible=preemptible,
+            raids_cpu=raids_cpu
     }
 
     output {
@@ -83,6 +85,7 @@ task RunRAIDS {
 
         String docker
         Int preemptible
+        Int raids_cpu
         
         String sample_name = basename(final_vcf, ".vcf.gz")
     }
@@ -96,7 +99,7 @@ task RunRAIDS {
     }
     runtime {
         docker: docker
-        cpu: 1
+        cpu: raids_cpu
         preemptible: preemptible
         memory: "10G"
     }

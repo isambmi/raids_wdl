@@ -11,7 +11,7 @@ workflow RAIDS {
         Int nb_profiles = 30
 
         String docker_bcftools = "quay.io/biocontainers/bcftools:1.22--h3a4d415_1"
-        String docker_raids = "isabmi/raids:latest"
+        String docker_raids = "isambmi/raids:latest"
 
         Int preemptible = 1
     }

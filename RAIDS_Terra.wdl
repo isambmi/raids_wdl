@@ -93,6 +93,7 @@ task RunRAIDS {
         String sample_name = basename(final_vcf, ".vcf.gz")
     }
     command {
+        echo "hi"
         Rscript /opt/raids/RAIDS_script.R \
             ~{ref_genotype} \
             ~{ref_annotation} \

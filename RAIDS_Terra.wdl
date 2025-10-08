@@ -12,7 +12,7 @@ workflow RAIDS {
         Int nb_profiles = 30
 
         String docker_bcftools = "us-central1-docker.pkg.dev/image-rchiv/gdc-raids/bcftools:1.22--h3a4d415_1"
-        String docker_raids = "us-central1-docker.pkg.dev/image-rchiv/gdc-raids/raids:generic_minimal"
+        String docker_raids = "us-central1-docker.pkg.dev/image-rchiv/gdc-raids/raids:generic"
 
         Int preemptible = 1
         Int raids_cpu = 1

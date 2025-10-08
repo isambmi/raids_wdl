@@ -11,8 +11,8 @@ workflow RAIDS {
         File ref_fai = "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
         Int nb_profiles = 30
 
-        String docker_bcftools = "quay.io/biocontainers/bcftools:1.22--h3a4d415_1"
-        String docker_raids = "isambmi/raids:generic"
+        String docker_bcftools = "us-central1-docker.pkg.dev/image-rchiv/gdc-raids/bcftools:1.22--h3a4d415_1"
+        String docker_raids = "us-central1-docker.pkg.dev/image-rchiv/gdc-raids/raids:generic_minimal"
 
         Int preemptible = 1
         Int raids_cpu = 1

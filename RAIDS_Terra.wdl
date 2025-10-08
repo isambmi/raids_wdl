@@ -5,13 +5,14 @@ workflow RAIDS {
     input {
         File vcf_in
         String sample_id
+        String normal_sample_id = "NORMAL"
         File ref_genotype = "gs://fc-738f2fe5-f3c7-4c79-a381-b88c5cb91cda/refGDS/matGeno1000g.gds"
         File ref_annotation = "gs://fc-738f2fe5-f3c7-4c79-a381-b88c5cb91cda/refGDS/matAnnot1000g.gds"
         File ref_fai = "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
         Int nb_profiles = 30
 
         String docker_bcftools = "quay.io/biocontainers/bcftools:1.22--h3a4d415_1"
-        String docker_raids = "isambmi/raids:latest"
+        String docker_raids = "isambmi/raids:generic"
 
         Int preemptible = 1
         Int raids_cpu = 1
@@ -23,6 +24,7 @@ workflow RAIDS {
         input:
             vcf_in=vcf_in,
             sample_id=sample_id,
+            normal_sample_id=normal_sample_id,
         
             docker=docker_bcftools,
             preemptible=preemptible
@@ -30,8 +32,7 @@ workflow RAIDS {
 
     call RunRAIDS {
         input:
-            final_vcf=VcfPreprocessing.final_vcf,
-            final_vcf_idx=VcfPreprocessing.final_vcf_idx,
+            input_csv=VcfPreprocessing.csv,
             ref_genotype=ref_genotype,
             ref_annotation=ref_annotation,
             ref_fai=ref_fai,
@@ -52,19 +53,36 @@ workflow RAIDS {
 
 task VcfPreprocessing {
     input {
-        String sample_id
         File vcf_in
+        String sample_id
+        String normal_sample_id
         String docker
         Int preemptible
     }
 
     command 
     <<<
+        # create index
         bcftools index --tbi ~{vcf_in}
 
-        bcftools view -v snps -M2 \
-        -Oz -o ~{sample_id}.vcf.gz ~{vcf_in} && \
-        bcftools index -t ~{sample_id}.vcf.gz
+        # filter for multiallelic non-SNPs
+        bcftools view -v snps -m2 -M2 \
+        -s ~{normal_sample_id} \
+        -Oz -o tmp.vcf.gz ~{vcf_in} && \
+        bcftools index -t tmp.vcf.gz
+
+        # building generic format file from VCF
+        bcftools query -s ~{normal_sample_id} -f '%CHROM\t%POS\t%REF\t%ALT\t[%AD]\n' tmp.vcf.gz \
+        | awk 'BEGIN{
+                OFS=","; print "Chromosome,Position,Ref,Alt,Count,File1R,File1A"
+            }
+            {
+                split($5,a,","); Chrom=$1; Pos0=$2-1; Ref=$3; Alt=$4;
+                File1R=a[1]; File1A=a[2]; Count=File1R+File1A;
+                print Chrom,Pos0,Ref,Alt,Count,File1R,File1A
+            }' > ~{sample_id}.csv
+
+
     >>>
     runtime {
         docker: docker
@@ -73,15 +91,13 @@ task VcfPreprocessing {
         preemptible: preemptible
     }
     output {
-        File final_vcf = "~{sample_id}.vcf.gz"
-        File final_vcf_idx = "~{sample_id}.vcf.gz.tbi"
+        File csv = "~{sample_id}.csv"
     }
 }
 
 task RunRAIDS {
     input {
-        File final_vcf
-        File final_vcf_idx
+        File input_csv
         File ref_genotype
         File ref_annotation
         File ref_fai
@@ -93,15 +109,14 @@ task RunRAIDS {
         String raids_mem
         String raids_disk
         
-        String sample_name = basename(final_vcf, ".vcf.gz")
+        String sample_name = basename(input_csv, ".csv")
     }
     command {
-        echo "hi"
         Rscript /opt/raids/RAIDS_script.R \
             ~{ref_genotype} \
             ~{ref_annotation} \
             ~{ref_fai} \
-            ~{final_vcf} \
+            ~{input_csv} \
             ~{nb_profiles}
     }
     runtime {

@@ -16,7 +16,7 @@ workflow RAIDS {
 
         Int preemptible = 1
         Int raids_cpu = 1
-        String raids_mem = "10G"
+        String raids_mem = "25G"
         String raids_disk = "local-disk 50 HDD"
     }
 

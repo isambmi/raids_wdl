@@ -6,6 +6,7 @@ workflow RAIDSFromBam {
     input {
         
         File bam
+        File bam_bai
 
         File bam_fasta
         File bam_fasta_fai
@@ -43,6 +44,7 @@ workflow RAIDSFromBam {
             fasta_fai = bam_fasta_fai,
             fasta_dict = bam_fasta_dict,
             bam = bam,
+            bam_bai = bam_bai,
             sample_id = sample_id,
             intervals = intervals,
             docker = docker_gatk
@@ -101,6 +103,7 @@ task generateVcf {
         File fasta_fai
         File fasta_dict
         File bam
+        File bam_bai
         String sample_id
         File intervals
         String docker

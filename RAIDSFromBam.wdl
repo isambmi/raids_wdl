@@ -162,7 +162,7 @@ task processVcf {
         File fasta
         File fasta_fai
         File fasta_dict
-        File docker
+        String docker
     }
     command {
         bcftools view -Oz -o ~{sample_id}.pre.vcf.gz ~{vcf}

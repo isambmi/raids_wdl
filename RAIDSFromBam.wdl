@@ -141,7 +141,7 @@ task liftOverVcf {
         String docker
     }
     command {
-        CrossMap.py vcf \
+        CrossMap vcf --chromid l \
             ~{lift_chain} \
             ~{vcf} \
             ~{fasta} \

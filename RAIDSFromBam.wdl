@@ -24,7 +24,7 @@ workflow RAIDSFromBam {
 
         File ref_genotype
         File ref_annotation
-
+        File ref_2bit
         Int nb_profiles = 30
 
         File fasta = if(liftover) then lift_fasta else bam_fasta
@@ -82,8 +82,8 @@ workflow RAIDSFromBam {
             vcf_idx = processVcf.final_vcf_idx,
             ref_genotype = ref_genotype,
             ref_annotation = ref_annotation,
+            ref_2bit = ref_2bit,
             nb_profiles = nb_profiles,
-            fasta = fasta,
             docker = docker_raids
     }
 
@@ -193,7 +193,7 @@ task runRAIDS {
         File vcf_idx
         File ref_genotype
         File ref_annotation
-        File fasta
+        File ref_2bit
         Int nb_profiles
 
         String docker
@@ -203,7 +203,7 @@ task runRAIDS {
         Rscript /opt/raids/RAIDS_script.R \
             ~{ref_genotype} \
             ~{ref_annotation} \
-            ~{fasta} \
+            ~{ref_2bit} \
             ~{vcf} \
             ~{nb_profiles}
     }

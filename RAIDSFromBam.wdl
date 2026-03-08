@@ -165,9 +165,7 @@ task processVcf {
         String docker
     }
     command {
-        bcftools view -Oz -o ~{sample_id}.pre.vcf.gz ~{vcf}
-
-        bcftools sort -Oz -o  ~{sample_id}.sorted.vcf.gz ~{sample_id}.pre.vcf.gz
+        bcftools sort ~{vcf} -Oz -o  ~{sample_id}.sorted.vcf.gz
         bcftools index -t ~{sample_id}.sorted.vcf.gz 
 
         bcftools norm -m -any -f ~{fasta} \

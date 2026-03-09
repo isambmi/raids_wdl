@@ -112,15 +112,11 @@ task generateVcf {
         gatk --java-options "-Xmx8g" HaplotypeCaller  \
             -R ~{fasta} \
             -I ~{bam} \
-            -O ~{sample_id}.g.vcf.gz \
-            -L ~{intervals} \
-            -ERC BP_RESOLUTION
-            
-        gatk --java-options "-Xmx8g" GenotypeGVCFs \
-            -R ~{fasta} \
-            -V ~{sample_id}.g.vcf.gz \
             -O ~{sample_id}.vcf.gz \
-            --include-non-variant-sites
+            -L ~{intervals} \
+            -ERC NONE \
+            --output-mode EMIT_ALL_CONFIDENT_SITES
+    
     }
     runtime {
         docker: docker

@@ -109,7 +109,7 @@ task generateVcf {
         String docker
     }
     command {
-        gatk --java-options "-Xmx8g" HaplotypeCaller  \
+        gatk --java-options "-Xmx16g" HaplotypeCaller  \
             -R ~{fasta} \
             -I ~{bam} \
             -O ~{sample_id}.vcf.gz \
